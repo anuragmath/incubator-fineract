@@ -18,15 +18,10 @@
  */
 package org.apache.fineract.organisation.teller.data;
 
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.apache.fineract.organisation.office.data.OfficeData;
-import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.teller.domain.TellerStatus;
 import org.joda.time.LocalDate;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Date;
 
 /**
  * {@code TellerData} represents an immutable data object for teller data.
@@ -54,9 +49,6 @@ public final class TellerData implements Serializable {
     
     private String officeName;
     
-    private final Collection<OfficeData> officeOptions;
-    private final Collection<StaffData> staffOptions;
-
     /*
      * Sole private CTOR to create a new instance.
      */
@@ -75,8 +67,6 @@ public final class TellerData implements Serializable {
         this.status = status;
         this.hasTransactions = hasTransactions;
         this.hasMappedCashiers = hasMappedCashiers;
-        this.officeOptions = null;
-        this.staffOptions = null;
     }
 
     /**

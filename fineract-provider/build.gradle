@@ -39,7 +39,7 @@ project.ext.springDataJpaVersion = '1.7.0.RELEASE' // also change spring-boot-gr
 
 project.ext.mysqlUser='root'
 project.ext.mysqlPassword='mysql'
-project.ext.jdbcurl = 'jdbc:mysql://192.168.99.100:4900/'
+project.ext.jdbcurl = 'jdbc:mysql://localhost:3306/'
 
 
 group = 'org.apache.fineract'
@@ -245,7 +245,7 @@ task dropDB<<{
 task setBlankPassword<<{
     sql = Sql.newInstance( jdbcurl, mysqlUser, mysqlPassword, 'com.mysql.jdbc.Driver' )
     sql.execute('USE `mifosplatform-tenants`')
-    sql.execute('UPDATE mifosplatform-tenants.tenants SET schema_server = \'192.168.99.100\', schema_server_port = \'4900\', schema_username = \'mifos\', schema_password = \'mysql\' WHERE id=1;')
+    sql.execute('UPDATE mifosplatform-tenants.tenants SET schema_server = \'localhost\', schema_server_port = \'3306\', schema_username = \'mifos\', schema_password = \'mysql\' WHERE id=1;')
 }
 
 
@@ -263,7 +263,7 @@ buildscript {
 
 
 flyway {
-    url = "jdbc:mysql://192.168.99.100:4900/mifostenant-default"
+    url = "jdbc:mysql://localhost:3306/mifostenant-default"
 	driver = "com.mysql.jdbc.Driver"
     user = mysqlUser
     password = mysqlPassword
@@ -278,7 +278,7 @@ task migrateTenantDB<<{
 		tenantDbName = rootProject.getProperty("dbName")
 	}
 	
-    flyway.url= "jdbc:mysql://192.168.99.100:4900/$tenantDbName"
+    flyway.url= "jdbc:mysql://localhost:3306/$tenantDbName"
 	flyway.driver = "com.mysql.jdbc.Driver"
     flyway.locations= [filePath]
     /**We use ${ as the prefix for strecthy reporting, do not want them to be interpreted by Flyway**/
@@ -295,7 +295,7 @@ task showTenantDBInfo<<{
 		tenantDbName = rootProject.getProperty("dbName")
 	}
 	
-    flyway.url= "jdbc:mysql://192.168.99.100:4900/$tenantDbName"
+    flyway.url= "jdbc:mysql://localhost:3306/$tenantDbName"
 	flyway.driver = "com.mysql.jdbc.Driver"
     flyway.locations= [filePath]
     flywayInfo.execute()
@@ -311,7 +311,7 @@ task migrateTenantListDB<<{
 		tenantsDbName = rootProject.getProperty("dbName")
 	}
 	
-    flyway.url= "jdbc:mysql://192.168.99.100:4900/$tenantsDbName"
+    flyway.url= "jdbc:mysql://localhost:3306/$tenantsDbName"
 	flyway.driver = "com.mysql.jdbc.Driver"
     flyway.locations= [filePath]
 
@@ -327,7 +327,7 @@ task showTenantListDBInfo<<{
 		tenantsDbName = rootProject.getProperty("dbName")
 	}
     
-    flyway.url= "jdbc:mysql://192.168.99.100:4900/$tenantsDbName"
+    flyway.url= "jdbc:mysql://localhost:3306/$tenantsDbName"
 	flyway.driver = "com.mysql.jdbc.Driver"
     flyway.locations= [filePath]
     flywayInfo.execute()
@@ -342,7 +342,7 @@ task repairTenantDB<<{
         tenantsDbName = rootProject.getProperty("dbName")
     }
     
-    flyway.url= "jdbc:mysql://192.168.99.100:4900/$tenantsDbName"
+    flyway.url= "jdbc:mysql://localhost:3306/$tenantsDbName"
 	flyway.driver = "com.mysql.jdbc.Driver"
     flyway.locations= [filePath]
     flywayRepair.execute()

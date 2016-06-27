@@ -21,8 +21,6 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -32,16 +30,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.persistence.criteria.CriteriaBuilder.In;
-
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.hibernate.annotations.Index;
-import org.hibernate.annotations.IndexColumn;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 

@@ -66,6 +66,7 @@ public interface LoanApiConstants {
     public static final String numberOfRepaymentsParameterName = "numberOfRepayments";
     public static final String repaymentEveryParameterName = "repaymentEvery";
     public static final String interestRatePerPeriodParameterName = "interestRatePerPeriod";
+    public static final String flatInterestRatePerPeriodParameterName = "flatInterestRatePerPeriod";
     public static final String inArrearsToleranceParameterName = "inArrearsTolerance";
     public static final String interestChargedFromDateParameterName = "interestChargedFromDate";
     public static final String submittedOnDateParameterName = "submittedOnDate";

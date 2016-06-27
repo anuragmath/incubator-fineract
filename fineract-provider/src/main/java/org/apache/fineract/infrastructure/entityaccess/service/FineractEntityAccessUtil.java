@@ -18,12 +18,7 @@
  */
 package org.apache.fineract.infrastructure.entityaccess.service;
 
-import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
-
-import org.apache.fineract.infrastructure.codes.data.CodeValueData;
-import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationProperty;
@@ -48,9 +43,6 @@ public class FineractEntityAccessUtil {
     
     private final PlatformSecurityContext context;
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
-    private final CodeValueReadPlatformService codeValueReadPlatformService;
-    private final CodeValueRepositoryWrapper codeValueRepository;
-    private final FineractEntityAccessWriteService fineractEntityAccessWriteService;
     private final FineractEntityAccessReadService fineractEntityAccessReadService;
     private final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepositoryWrapper;
     private final FineractEntityToEntityMappingRepository fineractEntityToEntityMappingRepository;
@@ -67,9 +59,6 @@ public class FineractEntityAccessUtil {
             final FineractEntityToEntityMappingRepository fineractEntityToEntityMappingRepository) {
     	this.context = context;
         this.globalConfigurationRepository = globalConfigurationRepository;
-        this.fineractEntityAccessWriteService = fineractEntityAccessWriteService;
-        this.codeValueReadPlatformService = codeValueReadPlatformService;
-        this.codeValueRepository = codeValueRepository;
         this.fineractEntityAccessReadService = fineractEntityAccessReadService;
         this.fineractEntityRelationRepositoryWrapper = fineractEntityRelationRepositoryWrapper;
         this.fineractEntityToEntityMappingRepository = fineractEntityToEntityMappingRepository;

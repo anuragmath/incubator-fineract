@@ -9,13 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import groovy.transform.AutoClone;
 @Service
 @CommandType(entity = "LOAN", action = "UPDATETRANSACTIONSTATUS")
 public class UpdateTransactionStatusCommandHandler implements NewCommandSourceHandler{
-	
+
 	private final LoanWritePlatformService writePlatformService;
-	
+
 	@Autowired
 	public UpdateTransactionStatusCommandHandler(final LoanWritePlatformService writePlatformService) {
 		this.writePlatformService = writePlatformService;

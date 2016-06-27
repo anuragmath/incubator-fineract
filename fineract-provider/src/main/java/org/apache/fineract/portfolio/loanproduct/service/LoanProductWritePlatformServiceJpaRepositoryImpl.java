@@ -28,7 +28,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
-import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.charge.domain.Charge;

@@ -36,7 +36,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.template.domain.Template;
 import org.apache.fineract.template.domain.TemplateFunctions;
 import org.codehaus.jackson.map.ObjectMapper;
