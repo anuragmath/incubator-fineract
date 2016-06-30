@@ -11,18 +11,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "LOAN", action = "UPDATETRANSACTIONSTATUS")
-public class UpdateTransactionStatusCommandHandler implements NewCommandSourceHandler{
+public class UpdateTransactionStatusCommandHandler implements NewCommandSourceHandler {
 
-	private final LoanWritePlatformService writePlatformService;
+    private final LoanWritePlatformService writePlatformService;
 
-	@Autowired
-	public UpdateTransactionStatusCommandHandler(final LoanWritePlatformService writePlatformService) {
-		this.writePlatformService = writePlatformService;
-	}
+    @Autowired
+    public UpdateTransactionStatusCommandHandler(final LoanWritePlatformService writePlatformService) {
+        this.writePlatformService = writePlatformService;
+    }
 
-	@Transactional
-	@Override
-	public CommandProcessingResult processCommand(final JsonCommand command) {
-		return this.writePlatformService.updateTransactionStatus(command.getLoanId(), command.entityId(), command);
-	}
+    @Transactional
+    @Override
+    public CommandProcessingResult processCommand(final JsonCommand command) {
+        return this.writePlatformService.updateTransactionStatus(command.getLoanId(), command.entityId(), command);
+    }
 }

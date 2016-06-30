@@ -32,195 +32,179 @@ import javax.persistence.TemporalType;
 import org.joda.time.LocalDate;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
-
 @Entity
 @Table(name = "m_payment_inventory_pdc")
-public class PaymentInventoryPdc extends AbstractPersistable<Long>{
-	 
-	 	
-	  /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+public class PaymentInventoryPdc extends AbstractPersistable<Long> {
 
-	  @ManyToOne(optional = false)
-	  @JoinColumn(name = "payment_id")
-	  private PaymentInventory paymentInventory;
-	
-	  @Column(name = "period", nullable = true)
-	  private Integer period;
-	 
-	  @Temporal(TemporalType.DATE)
-	  @Column(name = "date")
-	  private Date date;
-	  
-	  @Column(name = "amount", scale = 6, precision = 19, nullable = false)
-	  private BigDecimal amount;
-	  
-	  @Temporal(TemporalType.DATE)
-	  @Column(name = "cheque_date" )
-	  private Date chequeDate;
-	  
-	  @Column(name = "cheque_no", nullable = false)
-	  private Long chequeno;
-	
-	  @Column(name = "name_of_bank", nullable = false)
-	  private String nameOfBank;
-		
-	  @Column(name = "ifsc_code", nullable = false)
-	  private String ifscCode;
-		
-	  @Column(name = "present_type_of", nullable = false)
-	  private Integer presentationStatus;
-		
-	  @Column(name = "make_presentation", nullable = false)
-	  private boolean makePresentation;
-	  
-	  protected PaymentInventoryPdc(){
-	    	this.date = null;
-	    	this.presentationStatus = null;
-	    	this.amount = null;
-	    	this.chequeDate = null;
-	    	this.chequeno = null;
-	    	this.ifscCode = null;
-	    	this.period = null;
-	    	this.nameOfBank = null;
-	    	this.makePresentation = false;
-	    	
-	  }
+    /**
+    * 
+    */
+    private static final long serialVersionUID = 1L;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "payment_id")
+    private PaymentInventory paymentInventory;
 
-	  public PaymentInventoryPdc(final Integer period, final LocalDate date, final BigDecimal amount, 
-			  final LocalDate chequeDate, final Long chequeno, final String nameOfBank, final String ifscCode, 
-			  final PdcPresentationEnumOption status, final boolean makePresentation){
-		  this.period = period;
-		  this.amount = amount;
-		  this.chequeDate = chequeDate.toDate();
-		  this.chequeno = chequeno;
-		  this.date = date.toDate();
-		  this.ifscCode = ifscCode;
-		  this.nameOfBank = nameOfBank;
-		  this.presentationStatus = status.getValue();
-		  this.makePresentation = makePresentation;
-	
-	  }
-	  
-	  public PaymentInventoryPdc(final PaymentInventory payment,final Integer period, final LocalDate date, final BigDecimal amount, 
-			  final LocalDate chequeDate, final Long chequeno, final String nameOfBank, final String ifscCode, 
-			  final PdcPresentationEnumOption status, final boolean makePresentation){
-		  this.paymentInventory = payment;
-		  this.period = period;
-		  this.date = date.toDate();
-		  this.amount = amount;
-		  this.chequeDate = chequeDate.toDate();
-		  this.chequeno = chequeno;
-		  this.nameOfBank = nameOfBank;
-		  this.ifscCode = ifscCode;
-		  this.presentationStatus = status.getValue();
-		  this.makePresentation = makePresentation;
-	  }
+    @Column(name = "period", nullable = true)
+    private Integer period;
 
+    @Temporal(TemporalType.DATE)
+    @Column(name = "date")
+    private Date date;
 
+    @Column(name = "amount", scale = 6, precision = 19, nullable = false)
+    private BigDecimal amount;
 
+    @Temporal(TemporalType.DATE)
+    @Column(name = "cheque_date")
+    private Date chequeDate;
 
-	public static PaymentInventoryPdc createNew(final PaymentInventory payment,final Integer period, final LocalDate date, final BigDecimal amount,
-			final LocalDate chequeDate, final Long chequeno, final String nameOfBank, final String ifscCode,
-			final Integer presentationStatus, final boolean makePresentation) {
-		
-		final PdcPresentationEnumOption status = PdcPresentationEnumOption.fromInt(presentationStatus);
-		return new PaymentInventoryPdc(payment,period, date, amount, chequeDate, chequeno, nameOfBank, ifscCode, status, makePresentation);
-	}
-	
-	
-	public Integer getPeriod() {
-		return period;
-	}
+    @Column(name = "cheque_no", nullable = false)
+    private Long chequeno;
 
+    @Column(name = "name_of_bank", nullable = false)
+    private String nameOfBank;
 
-	public void setPeriod(Integer period) {
-		this.period = period;
-	}
+    @Column(name = "ifsc_code", nullable = false)
+    private String ifscCode;
 
+    @Column(name = "present_type_of", nullable = false)
+    private Integer presentationStatus;
 
-	public Date getDate() {
-		return date;
-	}
+    @Column(name = "make_presentation", nullable = false)
+    private boolean makePresentation;
 
+    protected PaymentInventoryPdc() {
+        this.date = null;
+        this.presentationStatus = null;
+        this.amount = null;
+        this.chequeDate = null;
+        this.chequeno = null;
+        this.ifscCode = null;
+        this.period = null;
+        this.nameOfBank = null;
+        this.makePresentation = false;
 
-	public void setDate(Date date) {
-		this.date = date;
-	}
+    }
 
+    public PaymentInventoryPdc(final Integer period, final LocalDate date, final BigDecimal amount, final LocalDate chequeDate,
+            final Long chequeno, final String nameOfBank, final String ifscCode, final PdcPresentationEnumOption status,
+            final boolean makePresentation) {
+        this.period = period;
+        this.amount = amount;
+        this.chequeDate = chequeDate.toDate();
+        this.chequeno = chequeno;
+        this.date = date.toDate();
+        this.ifscCode = ifscCode;
+        this.nameOfBank = nameOfBank;
+        this.presentationStatus = status.getValue();
+        this.makePresentation = makePresentation;
 
-	public BigDecimal getAmount() {
-		return amount;
-	}
+    }
 
+    public PaymentInventoryPdc(final PaymentInventory payment, final Integer period, final LocalDate date, final BigDecimal amount,
+            final LocalDate chequeDate, final Long chequeno, final String nameOfBank, final String ifscCode,
+            final PdcPresentationEnumOption status, final boolean makePresentation) {
+        this.paymentInventory = payment;
+        this.period = period;
+        if (date.equals(null))
+            this.date = null;
+        else
+            this.date = date.toDate();
+        this.amount = amount;
+        if (chequeDate.equals(null))
+            this.chequeDate = null;
+        else
+            this.chequeDate = chequeDate.toDate();
+        this.chequeno = chequeno;
+        this.nameOfBank = nameOfBank;
+        this.ifscCode = ifscCode;
+        this.presentationStatus = status.getValue();
+        this.makePresentation = makePresentation;
+    }
 
-	public void setAmount(BigDecimal amount) {
-		this.amount = amount;
-	}
+    public static PaymentInventoryPdc createNew(final PaymentInventory payment, final Integer period, final LocalDate date,
+            final BigDecimal amount, final LocalDate chequeDate, final Long chequeno, final String nameOfBank, final String ifscCode,
+            final Integer presentationStatus, final boolean makePresentation) {
 
+        final PdcPresentationEnumOption status = PdcPresentationEnumOption.fromInt(presentationStatus);
+        return new PaymentInventoryPdc(payment, period, date, amount, chequeDate, chequeno, nameOfBank, ifscCode, status, makePresentation);
+    }
 
-	public Date getChequeDate() {
-		return chequeDate;
-	}
+    public Integer getPeriod() {
+        return period;
+    }
 
+    public void setPeriod(Integer period) {
+        this.period = period;
+    }
 
-	public void setChequeDate(Date chequeDate) {
-		this.chequeDate = chequeDate;
-	}
+    public Date getDate() {
+        return date;
+    }
 
+    public void setDate(Date date) {
+        this.date = date;
+    }
 
-	public String getChequeno() {
-		return chequeno.toString();
-	}
+    public BigDecimal getAmount() {
+        return amount;
+    }
 
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
 
-	public void setChequeno(Long chequeno) {
-		this.chequeno = chequeno;
-	}
+    public Date getChequeDate() {
+        return chequeDate;
+    }
 
+    public void setChequeDate(Date chequeDate) {
+        this.chequeDate = chequeDate;
+    }
 
-	public String getNameOfBank() {
-		return nameOfBank;
-	}
+    public String getChequeno() {
+        return chequeno.toString();
+    }
 
+    public void setChequeno(Long chequeno) {
+        this.chequeno = chequeno;
+    }
 
-	public void setNameOfBank(String nameOfBank) {
-		this.nameOfBank = nameOfBank;
-	}
-	
-	public void setPresentationStatus(Integer presentationStatus){
-		this.presentationStatus = presentationStatus;
-		
-	}
+    public String getNameOfBank() {
+        return nameOfBank;
+    }
 
-	public String getIfscCode() {
-		return ifscCode;
-	}
+    public void setNameOfBank(String nameOfBank) {
+        this.nameOfBank = nameOfBank;
+    }
 
+    public void setPresentationStatus(Integer presentationStatus) {
+        this.presentationStatus = presentationStatus;
 
-	public void setIfscCode(String ifscCode) {
-		this.ifscCode = ifscCode;
-	}
+    }
 
+    public String getIfscCode() {
+        return ifscCode;
+    }
 
-	public boolean isMakePresentation() {
-		return makePresentation;
-	}
+    public void setIfscCode(String ifscCode) {
+        this.ifscCode = ifscCode;
+    }
 
+    public boolean isMakePresentation() {
+        return makePresentation;
+    }
 
-	public void setMakePresentation(boolean makePresentation) {
-		this.makePresentation = makePresentation;
-	}
+    public void setMakePresentation(boolean makePresentation) {
+        this.makePresentation = makePresentation;
+    }
 
+    public Integer getPresentationStatus() {
+        return presentationStatus;
+    }
 
-	public Integer getPresentationStatus() {
-		return presentationStatus;
-	}
-
-	public Integer getPresentation(){
-		return this.presentationStatus;
-	}
+    public Integer getPresentation() {
+        return this.presentationStatus;
+    }
 }
