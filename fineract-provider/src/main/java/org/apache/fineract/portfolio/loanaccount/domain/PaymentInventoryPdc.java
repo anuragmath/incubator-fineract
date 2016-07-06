@@ -48,10 +48,6 @@ public class PaymentInventoryPdc extends AbstractPersistable<Long> {
     @Column(name = "period", nullable = true)
     private Integer period;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "date")
-    private Date date;
-
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
 
@@ -65,8 +61,14 @@ public class PaymentInventoryPdc extends AbstractPersistable<Long> {
     @Column(name = "name_of_bank", nullable = false)
     private String nameOfBank;
 
+    @Column(name = "branch_name", nullable = false)
+    private String branchName;
+
     @Column(name = "ifsc_code", nullable = false)
     private String ifscCode;
+
+    @Column(name = "micr_code", nullable = false)
+    private String micrCode;
 
     @Column(name = "present_type_of", nullable = false)
     private Integer presentationStatus;
@@ -75,7 +77,6 @@ public class PaymentInventoryPdc extends AbstractPersistable<Long> {
     private boolean makePresentation;
 
     protected PaymentInventoryPdc() {
-        this.date = null;
         this.presentationStatus = null;
         this.amount = null;
         this.chequeDate = null;
@@ -84,51 +85,56 @@ public class PaymentInventoryPdc extends AbstractPersistable<Long> {
         this.period = null;
         this.nameOfBank = null;
         this.makePresentation = false;
+        this.micrCode = null;
+        this.branchName = null;
 
     }
 
-    public PaymentInventoryPdc(final Integer period, final LocalDate date, final BigDecimal amount, final LocalDate chequeDate,
-            final Long chequeno, final String nameOfBank, final String ifscCode, final PdcPresentationEnumOption status,
-            final boolean makePresentation) {
+    public PaymentInventoryPdc(final Integer period, final BigDecimal amount, final LocalDate chequeDate,
+            final Long chequeno, final String nameOfBank, final String branchName, final String ifscCode, final String micrCode,
+            final PdcPresentationEnumOption status, final boolean makePresentation) {
         this.period = period;
         this.amount = amount;
-        this.chequeDate = chequeDate.toDate();
+        if(chequeDate == null)
+            this.chequeDate = null;
+        else
+            this.chequeDate = chequeDate.toDate();
         this.chequeno = chequeno;
-        this.date = date.toDate();
         this.ifscCode = ifscCode;
+        this.micrCode = micrCode;
         this.nameOfBank = nameOfBank;
+        this.branchName = branchName;
         this.presentationStatus = status.getValue();
         this.makePresentation = makePresentation;
 
     }
 
-    public PaymentInventoryPdc(final PaymentInventory payment, final Integer period, final LocalDate date, final BigDecimal amount,
-            final LocalDate chequeDate, final Long chequeno, final String nameOfBank, final String ifscCode,
-            final PdcPresentationEnumOption status, final boolean makePresentation) {
+    public PaymentInventoryPdc(final PaymentInventory payment, final Integer period, final BigDecimal amount,
+            final LocalDate chequeDate, final Long chequeno, final String nameOfBank, final String branchName, final String ifscCode,
+            final String micrCode, final PdcPresentationEnumOption status, final boolean makePresentation) {
         this.paymentInventory = payment;
         this.period = period;
-        if (date.equals(null))
-            this.date = null;
-        else
-            this.date = date.toDate();
         this.amount = amount;
-        if (chequeDate.equals(null))
+        if(chequeDate == null)
             this.chequeDate = null;
         else
             this.chequeDate = chequeDate.toDate();
         this.chequeno = chequeno;
         this.nameOfBank = nameOfBank;
+        this.branchName = branchName;
+        this.micrCode = micrCode;
         this.ifscCode = ifscCode;
         this.presentationStatus = status.getValue();
         this.makePresentation = makePresentation;
     }
 
-    public static PaymentInventoryPdc createNew(final PaymentInventory payment, final Integer period, final LocalDate date,
-            final BigDecimal amount, final LocalDate chequeDate, final Long chequeno, final String nameOfBank, final String ifscCode,
-            final Integer presentationStatus, final boolean makePresentation) {
+    public static PaymentInventoryPdc createNew(final PaymentInventory payment, final Integer period,
+            final BigDecimal amount, final LocalDate chequeDate, final Long chequeno, final String nameOfBank, final String branchName,
+            final String ifscCode, final String micrCode, final Integer presentationStatus, final boolean makePresentation) {
 
         final PdcPresentationEnumOption status = PdcPresentationEnumOption.fromInt(presentationStatus);
-        return new PaymentInventoryPdc(payment, period, date, amount, chequeDate, chequeno, nameOfBank, ifscCode, status, makePresentation);
+        return new PaymentInventoryPdc(payment, period, amount, chequeDate, chequeno, nameOfBank, branchName, ifscCode, micrCode,
+                status, makePresentation);
     }
 
     public Integer getPeriod() {
@@ -137,14 +143,6 @@ public class PaymentInventoryPdc extends AbstractPersistable<Long> {
 
     public void setPeriod(Integer period) {
         this.period = period;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
     }
 
     public BigDecimal getAmount() {
@@ -179,6 +177,14 @@ public class PaymentInventoryPdc extends AbstractPersistable<Long> {
         this.nameOfBank = nameOfBank;
     }
 
+    public String getBranchName() {
+        return branchName;
+    }
+
+    public void setBranchName(String branchName) {
+        this.branchName = branchName;
+    }
+
     public void setPresentationStatus(Integer presentationStatus) {
         this.presentationStatus = presentationStatus;
 
@@ -190,6 +196,14 @@ public class PaymentInventoryPdc extends AbstractPersistable<Long> {
 
     public void setIfscCode(String ifscCode) {
         this.ifscCode = ifscCode;
+    }
+
+    public String getMicrCode() {
+        return micrCode;
+    }
+
+    public void setMicrCode(String micrCode) {
+        this.micrCode = micrCode;
     }
 
     public boolean isMakePresentation() {

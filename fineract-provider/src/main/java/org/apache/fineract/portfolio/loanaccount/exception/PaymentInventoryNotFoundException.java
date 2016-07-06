@@ -10,7 +10,12 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class PaymentInventoryNotFoundException extends AbstractPlatformResourceNotFoundException{
 	
-	public PaymentInventoryNotFoundException(final Long id) {
+	/**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
+    public PaymentInventoryNotFoundException(final Long id) {
         super("error.msg.paymentinventory.id.invalid", "Payment Inventory with identifier " + id + " does not exist", id);
     }
 

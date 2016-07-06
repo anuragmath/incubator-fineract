@@ -30,127 +30,121 @@ import org.joda.time.LocalDate;
 
 public class PaymentInventoryPdcData {
 
-		private final Long id;
-		
-		private final Integer period;
-		
-		private final LocalDate date;
-		
-		private final BigDecimal amount;
-		
-		private final LocalDate chequeDate;
-		
-		private final Long chequeno;
-		
-		private final String nameOfBank;
-		
-		private final String ifscCode;
-		
-		private EnumOptionData presentationStatus;
-		
-		private boolean makePresentation;
-		
-		private List<EnumOptionData> presentationType;
-		
-		public static PaymentInventoryPdcData template(final List<EnumOptionData> presentationType){
-			
-			return new PaymentInventoryPdcData(null, null, null, null, null, null, null, null, null, false, presentationType);
-			
-		}
-		
-		public static PaymentInventoryPdcData instance(final Long id, final Integer period,final LocalDate date, final BigDecimal amount, final LocalDate chequeDate,
-				final Long chequeno, final String nameOfBank, final String ifscCode, final EnumOptionData presentationStatus, 
-				final boolean makePresentation){
-			
-			final List<EnumOptionData> presentationType = null;
-			
-			return new PaymentInventoryPdcData(id, period, date, amount, chequeDate, chequeno, nameOfBank, ifscCode, presentationStatus, makePresentation, presentationType);
-			
-		}
+    private final Long id;
 
-		private  PaymentInventoryPdcData(final Long id, final Integer period,final LocalDate date, final BigDecimal amount, final LocalDate chequeDate,
-				final Long chequeno, final String nameOfBank, final String ifscCode, final EnumOptionData presentationStatus, final boolean makePresentation,final List<EnumOptionData> presentationType ){
-			this.period = period;
-			this.id = id;
-			this.date = date;
-			this.amount = amount;
-			this.chequeDate = chequeDate;
-			this.chequeno = chequeno;
-			this.nameOfBank = nameOfBank;
-			this.ifscCode = ifscCode;
-			this.presentationStatus = presentationStatus;
-			this.makePresentation = makePresentation;
-			this.presentationType = presentationType;
-		}
-		
-		
-		public Integer getPeriod() {
-			return period;
-		}
-		
-		
-		public Long getId(){
-			return this.id;
-		}
+    private final Integer period;
 
-		public LocalDate getDate() {
-			return date;
-		}
+    private final BigDecimal amount;
 
+    private final LocalDate chequeDate;
 
-		public LocalDate getChequeDate() {
-			return chequeDate;
-		}
+    private final Long chequeno;
 
+    private final String nameOfBank;
 
-		public String getNameOfBank() {
-			return nameOfBank;
-		}
+    private final String branchName;
+    
+    private final String ifscCode;
 
+    private final String micrCode;
+    
+    private EnumOptionData presentationStatus;
 
-		public String getIfscCode() {
-			return ifscCode;
-		}
+    private boolean makePresentation;
 
+    private List<EnumOptionData> presentationType;
 
-		public EnumOptionData getPresentationStatus() {
-			return presentationStatus;
-		}
+    public static PaymentInventoryPdcData template(final List<EnumOptionData> presentationType) {
 
+        return new PaymentInventoryPdcData(null, null, null, null, null, null, null, null, null, null, false, presentationType);
 
-		public boolean isMakePresentation() {
-			return makePresentation;
-		}
+    }
 
+    public static PaymentInventoryPdcData instance(final Long id, final Integer period, final BigDecimal amount,
+            final LocalDate chequeDate, final Long chequeno, final String nameOfBank, final String branchName, final String ifscCode,
+            final String micrCode, final EnumOptionData presentationStatus, final boolean makePresentation) {
 
-		public BigDecimal getAmount() {
-			return amount;
-		}
+        final List<EnumOptionData> presentationType = null;
 
-		public Long getChequeno() {
-			return chequeno;
-		}
-		
-		public void setPresentationStatus(EnumOptionData presentationStatus) {
-			this.presentationStatus = presentationStatus;
-		}
+        return new PaymentInventoryPdcData(id, period, amount, chequeDate, chequeno, nameOfBank, branchName, ifscCode, micrCode, presentationStatus,
+                makePresentation, presentationType);
 
-		public void setMakePresentation(boolean makePresentation) {
-			this.makePresentation = makePresentation;
-		}
+    }
 
-		public void setPresentationType(List<EnumOptionData> presentationType) {
-			this.presentationType = presentationType;
-		}
+    private PaymentInventoryPdcData(final Long id, final Integer period, final BigDecimal amount,
+            final LocalDate chequeDate, final Long chequeno, final String nameOfBank, final String branchName, final String ifscCode,
+            final String micrCode, final EnumOptionData presentationStatus, final boolean makePresentation, final List<EnumOptionData> presentationType) {
+        this.period = period;
+        this.id = id;
+        this.amount = amount;
+        this.chequeDate = chequeDate;
+        this.chequeno = chequeno;
+        this.nameOfBank = nameOfBank;
+        this.branchName = branchName;
+        this.ifscCode = ifscCode;
+        this.micrCode = micrCode;
+        this.presentationStatus = presentationStatus;
+        this.makePresentation = makePresentation;
+        this.presentationType = presentationType;
+    }
 
-		public List<EnumOptionData> getPresentationType() {
-			return presentationType;
-		}
-		
-		
+    public Integer getPeriod() {
+        return period;
+    }
 
-		
+    public Long getId() {
+        return this.id;
+    }
+
+    public LocalDate getChequeDate() {
+        return chequeDate;
+    }
+
+    public String getNameOfBank() {
+        return nameOfBank;
+    }
+
+    public String getBranchName() {
+        return branchName;
+    }
+    public String getIfscCode() {
+        return ifscCode;
+    }
+    
+    public String getMicrCode() {
+        return micrCode;
+    }
+
+    public EnumOptionData getPresentationStatus() {
+        return presentationStatus;
+    }
+
+    public boolean isMakePresentation() {
+        return makePresentation;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public Long getChequeno() {
+        return chequeno;
+    }
+
+    public void setPresentationStatus(EnumOptionData presentationStatus) {
+        this.presentationStatus = presentationStatus;
+    }
+
+    public void setMakePresentation(boolean makePresentation) {
+        this.makePresentation = makePresentation;
+    }
+
+    public void setPresentationType(List<EnumOptionData> presentationType) {
+        this.presentationType = presentationType;
+    }
+
+    public List<EnumOptionData> getPresentationType() {
+        return presentationType;
+    }
 
 }
-
-

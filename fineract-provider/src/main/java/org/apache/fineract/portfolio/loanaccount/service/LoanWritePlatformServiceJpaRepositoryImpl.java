@@ -19,6 +19,9 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,6 +33,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
+import javax.persistence.criteria.CriteriaBuilder.In;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
@@ -161,6 +166,8 @@ import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerAssignment
 import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerUnassignmentException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
+import org.apache.fineract.portfolio.loanaccount.exception.PaymentInventoryNotFoundException;
+import org.apache.fineract.portfolio.loanaccount.exception.PaymentInventoryPdcNotFound;
 import org.apache.fineract.portfolio.loanaccount.exception.PdcChequeAlreadyPresentedAndDeclined;
 import org.apache.fineract.portfolio.loanaccount.guarantor.service.GuarantorDomainService;
 import org.apache.fineract.portfolio.loanaccount.handler.UpdateTransactionStatusCommandHandler;
@@ -201,6 +208,8 @@ import org.springframework.util.CollectionUtils;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.sun.xml.bind.v2.schemagen.xmlschema.TopLevelElement;
 
 @Service
 public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatformService {
@@ -249,7 +258,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final PaymentTypeReadPlatformService paymentType;
     private final PaymentInventoryReadPlatformService paymentInventoryService;
     private final PaymentInventoryPdcRepository paymentInventoryPdc;
-
+   
     @Autowired
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final LoanEventApiJsonValidator loanEventApiJsonValidator,
@@ -326,6 +335,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.paymentInventoryService = paymentInventoryReadPlatformService;
         this.paymentInventoryPdc = paymentInventoryPdcRepository;
         this.loanPaymentInventory = paymentInventoryAssembler;
+        
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -844,7 +854,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
             final PaymentInventoryData inventoryId = this.paymentInventoryService.retrieveBasedOnLoanId(loanId);
             final PaymentInventoryPdcData payment;
-            if (inventoryId.getPdcType().equals(PdcTypeEnumerations.pdcType(2))) {
+            if (inventoryId.getPdcType().getId() == 2) {
                 payment = this.paymentInventoryService.retrieveByCheque(paymentDetail.getChequeNo(), inventoryId.getId());
             } else {
                 final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loan.possibleNextRepaymentInstallment();
@@ -855,10 +865,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
             final PaymentInventoryPdc paymentInventoryPdc = this.paymentInventoryPdc.findOne(payment.getId());
 
-            if (paymentInventoryPdc.getPresentationStatus().equals(4)) {
+            if (paymentInventoryPdc.getPresentationStatus().equals(5)) {
                 throw new PdcChequeAlreadyPresentedAndDeclined(paymentInventoryPdc.getChequeno());
             } else {
-                paymentInventoryPdc.setPresentationStatus(2);
+                paymentInventoryPdc.setPresentationStatus(3);
                 paymentInventoryPdc.setMakePresentation(true);
             }
         }
@@ -973,6 +983,113 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .build();
     }
 
+    @Transactional
+    @Override
+    public CommandProcessingResult updatePaymentInventory(final Long loanId, final Long inventoryId, final JsonCommand command) {
+        
+        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        if (loan.status().isClosed() && loan.getLoanSubStatus().equals(LoanSubStatus.FORECLOSED.getValue())) {
+            final String defaultUserMessage = "The loan cannot reopend as it is foreclosed.";
+            throw new LoanForeclosureException("loan.cannot.be.reopened.as.it.is.foreclosured", defaultUserMessage, loanId);
+        }
+        
+        checkClientOrGroupActive(loan);
+        
+        final PaymentInventory paymentInventoryToUpdate = this.paymentInventoryRepository.findOne(inventoryId);
+        if (paymentInventoryToUpdate == null) { throw new PaymentInventoryPdcNotFound(inventoryId); }
+        
+        final List<PaymentInventoryPdc> paymentInventoryPdc = paymentInventoryToUpdate.getPaymentInventoryPdc();
+        final CheckChangeInValue changeInValue = new CheckChangeInValue();
+        
+        final JsonArray paymentInventoryPdcData = command.arrayOfParameterNamed("pdcData");
+        
+        final Locale locale = command.extractLocale();
+        final String dateFormat = command.dateFormat();
+        
+        for(int i = 0; i < paymentInventoryPdcData.size(); i++){
+            
+            final Map<String, Object> changes = new LinkedHashMap<>();
+            
+            final JsonObject paymentInventorys = paymentInventoryPdcData.get(i).getAsJsonObject();
+            
+            PaymentInventoryPdc pdcData = paymentInventoryPdc.get(i);
+            final PaymentInventoryPdc pdcToUpdate = this.paymentInventoryPdc.findOne(pdcData.getId());
+            
+            final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed("amount", paymentInventorys, locale);
+            if(changeInValue.differenceExists(amount, pdcData.getAmount())) {
+                final BigDecimal newValue = amount;
+                changes.put("amount", newValue);
+                pdcToUpdate.setAmount(amount);
+            }
+            
+            final String chequeNo = this.fromApiJsonHelper.extractStringNamed("chequeNo", paymentInventorys);
+            if(changeInValue.differenceExists(chequeNo, pdcData.getChequeno())){
+                final String newValue = chequeNo;
+                changes.put("chequeNo", newValue);
+                pdcToUpdate.setChequeno(Long.valueOf(chequeNo).longValue());
+            }
+            
+            final String bankName = this.fromApiJsonHelper.extractStringNamed("nameOfBank", paymentInventorys);
+            if(changeInValue.differenceExists(bankName , pdcData.getNameOfBank())){
+                final String newValue = bankName;
+                changes.put("nameOfBank", newValue);
+                pdcToUpdate.setNameOfBank(bankName);
+            }
+            
+            final String branchName = this.fromApiJsonHelper.extractStringNamed("branchName", paymentInventorys);
+            if(changeInValue.differenceExists(branchName , pdcData.getBranchName())){
+                final String newValue = branchName;
+                changes.put("branchName", newValue);
+                pdcToUpdate.setBranchName(branchName);
+            }
+            
+            final String ifscCode = this.fromApiJsonHelper.extractStringNamed("ifscCode", paymentInventorys);
+            if(changeInValue.differenceExists(ifscCode, pdcData.getIfscCode())){
+                final String newValue = ifscCode;
+                changes.put("ifscCode", newValue);
+                pdcToUpdate.setIfscCode(ifscCode);
+            }
+            
+            final String micrCode = this.fromApiJsonHelper.extractStringNamed("micrCode", paymentInventorys);
+            if(changeInValue.differenceExists(micrCode, pdcData.getMicrCode())){
+                final String newValue = micrCode;
+                changes.put("micrCode", newValue);
+                pdcToUpdate.setMicrCode(micrCode);
+            }
+            
+            final LocalDate chequeDate = this.fromApiJsonHelper.extractLocalDateNamed("chequeDate", paymentInventorys, dateFormat, locale);
+            if(changeInValue.differenceExists(chequeDate, pdcData.getChequeDate())) {
+                final LocalDate newValue = chequeDate;
+                changes.put("chequeDate", newValue);
+                if(newValue == null)
+                    pdcToUpdate.setChequeDate(null);
+                else
+                    pdcToUpdate.setChequeDate(chequeDate.toDate());
+            }
+           
+            final Integer presentationStatus = this.fromApiJsonHelper.extractIntegerNamed("presentationStatus", paymentInventorys, locale);
+            if(changeInValue.differenceExists(presentationStatus, pdcData.getPresentationStatus())) {
+                final Integer newValue = presentationStatus;
+                changes.put("presentationStatus", newValue);
+                pdcToUpdate.setPresentationStatus(presentationStatus);
+            }
+           
+            if(!changes.isEmpty()){
+                this.paymentInventoryPdc.saveAndFlush(pdcToUpdate);
+            }
+        }
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(inventoryId) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .build();
+    }
+    
+    
+    
     @Transactional
     @Override
     public CommandProcessingResult adjustLoanTransaction(final Long loanId, final Long transactionId, final JsonCommand command) {
@@ -1126,7 +1243,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
             if (transactionAmount.equals(new BigDecimal(0))) {
                 transactionToAdjust.setTransactionStatus(3);
-                paymentInventoryPdc.setPresentationStatus(4);
+                paymentInventoryPdc.setPresentationStatus(5);
             }
         }
 
@@ -3130,4 +3247,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
     }
+
+   
 }

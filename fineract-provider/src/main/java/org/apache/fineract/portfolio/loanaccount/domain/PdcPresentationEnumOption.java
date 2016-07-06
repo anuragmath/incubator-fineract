@@ -21,10 +21,12 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 public enum PdcPresentationEnumOption {
 	INVALID(0, "pdcPresentationStatus.invalid"), //
-	UNUSED(1, "pdcPresentationStatus.unused"), //
-	PRESENTED(2, "pdcPresentationStatus.presented"), //
-	PRESENTED_AND_CLEARED(3, "pdcPresentationStatus.presentedAndCleared"), //
-	PRESENTED_AND_DECLINED(4, "pdcPresentationStatus.presentedAndDeclined");
+	NOT_RECEIVED(1, "pdcPresentationStatus.notReceived"), //
+	VERIFIED_AND_RECEIVED(2, "pdcPresentationStatus.verifiedAndReceived"), //
+	BANKED_AND_IN_PROCESS(3, "pdcPresentationStatus.bankedAndInProcess"), //
+	BANKED_AND_CLEARED(4, "pdcPresentationStatus.bankedAndCleared"), //
+	BANKED_AND_BOUNCED(5, "pdcPresentationStatus.bankedAndBounced"), //
+	SWAPPED(6, "pdcPresentationStatus.swapped");
 	
 	private final Integer value;
 	private final String code;
@@ -49,16 +51,22 @@ public enum PdcPresentationEnumOption {
 		PdcPresentationEnumOption pdcPresentationStatus = null;
 		switch (presentationStatus) {
 		case 1:
-			pdcPresentationStatus = PdcPresentationEnumOption.UNUSED;	
+			pdcPresentationStatus = PdcPresentationEnumOption.NOT_RECEIVED;	
 		break;
 		case 2:
-			pdcPresentationStatus = PdcPresentationEnumOption.PRESENTED;
+			pdcPresentationStatus = PdcPresentationEnumOption.VERIFIED_AND_RECEIVED;
 		break;
 		case 3:
-			pdcPresentationStatus = PdcPresentationEnumOption.PRESENTED_AND_CLEARED;
+			pdcPresentationStatus = PdcPresentationEnumOption.BANKED_AND_IN_PROCESS;
 		break;
 		case 4:
-			pdcPresentationStatus = PdcPresentationEnumOption.PRESENTED_AND_DECLINED;
+			pdcPresentationStatus = PdcPresentationEnumOption.BANKED_AND_CLEARED;
+		break;
+		case 5: 
+		        pdcPresentationStatus = PdcPresentationEnumOption.BANKED_AND_BOUNCED;
+		break;
+		case 6:
+		        pdcPresentationStatus = PdcPresentationEnumOption.SWAPPED;
 		break;
 		default:
 			pdcPresentationStatus = PdcPresentationEnumOption.INVALID;
@@ -71,19 +79,27 @@ public enum PdcPresentationEnumOption {
 		return this.value.equals(PdcPresentationEnumOption.INVALID.getValue());
 	}
 	
-	public boolean isUnused(){
-		return this.value.equals(PdcPresentationEnumOption.UNUSED.getValue());
+	public boolean isNotRecieved(){
+		return this.value.equals(PdcPresentationEnumOption.NOT_RECEIVED.getValue());
 	}
 	
-	public boolean isPresented(){
-		return this.value.equals(PdcPresentationEnumOption.PRESENTED.getValue());
+	public boolean isVerifiedAndReceived(){
+		return this.value.equals(PdcPresentationEnumOption.VERIFIED_AND_RECEIVED.getValue());
 	}
 	
-	public boolean isPresentedAndCleared(){
-		return this.value.equals(PdcPresentationEnumOption.PRESENTED_AND_CLEARED.getValue());
+	public boolean isBankedAndInProcess(){
+            return this.value.equals(PdcPresentationEnumOption.BANKED_AND_IN_PROCESS.getValue());
 	}
 	
-	public boolean isDeclined(){
-		return this.value.equals(PdcPresentationEnumOption.PRESENTED_AND_DECLINED.getValue());
+	public boolean isBankedAndCleared(){
+		return this.value.equals(PdcPresentationEnumOption.BANKED_AND_CLEARED.getValue());
 	}
+	
+	public boolean isBankedAndDeclined(){
+		return this.value.equals(PdcPresentationEnumOption.BANKED_AND_BOUNCED.getValue());
+	}
+	
+	public boolean isSwapped(){
+            return this.value.equals(PdcPresentationEnumOption.SWAPPED.getValue());
+    }
 }

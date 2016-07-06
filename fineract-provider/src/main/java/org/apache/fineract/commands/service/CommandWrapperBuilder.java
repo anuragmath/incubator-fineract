@@ -2761,6 +2761,15 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
+        public CommandWrapperBuilder updatePaymentInventory(final Long loanId, final Long inventoryId) {
+                this.actionName = "UPDATE";
+                this.entityName = "PAYMENTINVENTORY";
+                this.entityId = inventoryId;
+                this.loanId = loanId;
+                this.href = "/loans/" + loanId + "/paymentinventory/" + inventoryId;
+                return this;
+        }
+        
 	public CommandWrapperBuilder deletePaymentInventory(final Long loanId, final Long inventoryId) {
 		this.actionName = "DELETE";
 		this.entityName = "PAYMENTINVENTORY";
@@ -2778,5 +2787,6 @@ public class CommandWrapperBuilder {
 		this.href = "/loans/" + loanId + "/transactions/" + transactionId;
 		return this;
 	}
+	
 
 }

@@ -81,7 +81,7 @@ public class PaymentInventory extends AbstractPersistable<Long> {
     public static PaymentInventory createNewFromJson(final Loan loan, final JsonCommand command) {
         final Integer periods = loan.getLoanRepaymentScheduleDetail().getNumberOfRepayments();
         final boolean isDirectDebitActive = command.booleanPrimitiveValueOfParameterNamed("isDirectDebitActive");
-        final Integer pdcType = command.integerValueOfParameterNamed("pdcType");
+        final Integer pdcType = command.integerValueOfParameterNamed("pdcTypeId");
         final boolean isSeriesCheques = command.booleanPrimitiveValueOfParameterNamed("isSeriesCheques");
         final boolean isChequesDispatched = command.booleanPrimitiveValueOfParameterNamed("isChequesDispatched");
         return createNewFromJson(loan, command, periods, isDirectDebitActive, pdcType, isSeriesCheques, isChequesDispatched);

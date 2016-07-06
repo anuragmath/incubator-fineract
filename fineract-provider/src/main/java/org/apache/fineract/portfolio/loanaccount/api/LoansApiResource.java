@@ -511,6 +511,7 @@ public class LoansApiResource {
 				}
 			}
 
+			
 			if (associationParameters.contains("paymentInventory")) {
 				mandatoryResponseParameters.add("paymentInventory");
 				try  {
@@ -524,6 +525,7 @@ public class LoansApiResource {
 				}
 				
 			}
+			
 
 			if (associationParameters.contains("meeting")) {
 				mandatoryResponseParameters.add("meeting");

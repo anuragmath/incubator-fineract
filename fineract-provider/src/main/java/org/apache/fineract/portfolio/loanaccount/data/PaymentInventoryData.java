@@ -26,92 +26,86 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleD
 
 public class PaymentInventoryData {
 
-	private final Long id;
+    private final Long id;
 
-	private final Integer periods;
+    private final Integer periods;
 
-	private final boolean isDirectDebitActive;
+    private final boolean isDirectDebitActive;
 
-	private final Long loanId;
+    private final Long loanId;
 
-	private final Collection<PaymentInventoryPdcData> paymentInventoryPdc;
+    private final Collection<PaymentInventoryPdcData> paymentInventoryPdc;
+    
+    private final LoanScheduleData repayment;
+    
+    private EnumOptionData pdcType;
 
-	private final LoanScheduleData repayment;
+    private final boolean isSeriesCheques;
 
-	private final PaymentInventoryPdcData options;
+    private final boolean isChequesDispatched;
 
-	private EnumOptionData pdcType;
+    public PaymentInventoryData defaults(final Long id, final Integer periods, boolean isDirectDebitActive) {
+        return defaults(id, periods, isDirectDebitActive);
+    }
 
-	private final boolean isSeriesCheques;
+    public PaymentInventoryData(final Long id, final Integer periods, final boolean isDirectDebitActive, final Long loanid,
+            final Collection<PaymentInventoryPdcData> paymentInventoryPdcData, final LoanScheduleData repayment,
+            final PaymentInventoryPdcData options, final EnumOptionData pdcType, final boolean isSeriesCheques,
+            final boolean isChequesDispatched) {
+        this.id = id;
+        this.periods = periods;
+        this.isDirectDebitActive = isDirectDebitActive;
+        this.loanId = loanid;
+        this.paymentInventoryPdc = paymentInventoryPdcData;
+        this.pdcType = pdcType;
+        this.repayment = repayment;
+        this.isSeriesCheques = isSeriesCheques;
+        this.isChequesDispatched = isChequesDispatched;
+    }
 
-	private final boolean isChequesDispatched;
+    public static PaymentInventoryData template(final Integer period, final LoanScheduleData repayment,
+            final PaymentInventoryPdcData options) {
+        return new PaymentInventoryData(null, null, false, null, null, repayment, options, null, false, false);
+    }
 
-	public PaymentInventoryData defaults(final Long id, final Integer periods, boolean isDirectDebitActive) {
-		return defaults(id, periods, isDirectDebitActive);
-	}
+    public static PaymentInventoryData template(final LoanScheduleData repayment, final PaymentInventoryPdcData options) {
+        return template(1, repayment, options);
+    }
 
-	public PaymentInventoryData(final Long id, final Integer periods, final boolean isDirectDebitActive,
-			final Long loanid, final Collection<PaymentInventoryPdcData> paymentInventoryPdcData,
-			final LoanScheduleData repayment, final PaymentInventoryPdcData options, final EnumOptionData pdcType,
-			final boolean isSeriesCheques, final boolean isChequesDispatched) {
-		this.id = id;
-		this.periods = periods;
-		this.isDirectDebitActive = isDirectDebitActive;
-		this.loanId = loanid;
-		this.paymentInventoryPdc = paymentInventoryPdcData;
-		this.repayment = repayment;
-		this.options = options;
-		this.pdcType = pdcType;
-		this.isSeriesCheques = isSeriesCheques;
-		this.isChequesDispatched = isChequesDispatched;
-	}
+    public PaymentInventoryData(PaymentInventoryData paymentInventoryData, Collection<PaymentInventoryPdcData> pdcInventoryData) {
+        this.id = paymentInventoryData.id;
+        this.loanId = paymentInventoryData.loanId;
+        this.periods = paymentInventoryData.periods;
+        this.isDirectDebitActive = paymentInventoryData.isDirectDebitActive;
+        this.paymentInventoryPdc = pdcInventoryData;
+        this.pdcType = paymentInventoryData.pdcType;
+        this.repayment = null;
+        this.isSeriesCheques = paymentInventoryData.isSeriesCheques;
+        this.isChequesDispatched = paymentInventoryData.isChequesDispatched;
 
-	public static PaymentInventoryData template(final Integer period, final LoanScheduleData repayment,
-			final PaymentInventoryPdcData options) {
-		return new PaymentInventoryData(null, null, false, null, null, repayment, options, null, false, false);
-	}
+    }
 
-	public static PaymentInventoryData template(final LoanScheduleData repayment,
-			final PaymentInventoryPdcData options) {
-		return template(1, repayment, options);
-	}
+    public Long getId() {
+        return this.id;
+    }
 
-	public PaymentInventoryData(PaymentInventoryData paymentInventoryData,
-			Collection<PaymentInventoryPdcData> pdcInventoryData) {
-		this.id = paymentInventoryData.id;
-		this.loanId = paymentInventoryData.loanId;
-		this.periods = paymentInventoryData.periods;
-		this.isDirectDebitActive = paymentInventoryData.isDirectDebitActive;
-		this.paymentInventoryPdc = pdcInventoryData;
-		this.repayment = null;
-		this.options = null;
-		this.pdcType = paymentInventoryData.pdcType;
-		this.isSeriesCheques = paymentInventoryData.isSeriesCheques;
-		this.isChequesDispatched = paymentInventoryData.isChequesDispatched;
+    public boolean getIsDirectDebitActive() {
+        return this.isDirectDebitActive;
+    }
 
-	}
+    public boolean getIsSeriesCheques() {
+        return this.isSeriesCheques;
+    }
 
-	public Long getId() {
-		return this.id;
-	}
+    public boolean getisChequesDispatched() {
+        return this.isChequesDispatched;
+    }
 
-	public boolean getIsDirectDebitActive() {
-		return this.isDirectDebitActive;
-	}
+    public EnumOptionData getPdcType() {
+        return this.pdcType;
+    }
 
-	public boolean getIsSeriesCheques() {
-		return this.isSeriesCheques;
-	}
-
-	public boolean getisChequesDispatched() {
-		return this.isChequesDispatched;
-	}
-
-	public EnumOptionData getPdcType() {
-		return this.pdcType;
-	}
-
-	public Collection<PaymentInventoryPdcData> getPaymentInventoryPdcData() {
-		return this.paymentInventoryPdc;
-	}
+    public Collection<PaymentInventoryPdcData> getPaymentInventoryPdcData() {
+        return this.paymentInventoryPdc;
+    }
 }

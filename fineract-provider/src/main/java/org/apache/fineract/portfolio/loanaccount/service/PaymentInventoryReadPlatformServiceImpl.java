@@ -143,9 +143,10 @@ public class PaymentInventoryReadPlatformServiceImpl implements PaymentInventory
 	private static final class PaymentInventoryPdcMapper implements RowMapper<PaymentInventoryPdcData> {
 
 		public String schema() {
-			return "pdc.id as id, pdc.period as pdcPeriod, " + "pdc.date as Date, " + "pdc.amount as Amount, "
+			return "pdc.id as id, pdc.period as pdcPeriod, " + "pdc.amount as Amount, "
 					+ "pdc.cheque_date as chequeDate, " + "pdc.cheque_no as chequeNo, "
 					+ "pdc.name_of_bank as bankName, " + "pdc.ifsc_code as ifscCode, "
+					+ "pdc.micr_code as micrCode, " + "pdc.branch_name as branchName, "
 					+ "pdc.present_type_of as presentationStatus, " + "pdc.make_presentation as makePresentation "
 					+ "from m_payment_inventory_pdc pdc " + "join m_payment_inventory pi on pi.id = pdc.payment_id ";
 		}
@@ -157,17 +158,18 @@ public class PaymentInventoryReadPlatformServiceImpl implements PaymentInventory
 			final Long id = rs.getLong("id");
 			final int pdcPeriod = rs.getInt("pdcPeriod");
 			final BigDecimal amount = rs.getBigDecimal("Amount");
-			LocalDate date = JdbcSupport.getLocalDate(rs, "Date");
 			LocalDate chequeDate = JdbcSupport.getLocalDate(rs, "chequeDate");
 			final Long chequeNo = rs.getLong("chequeNo");
 			final String bankName = rs.getString("bankName");
+			final String branchName = rs.getString("branchName");
+			final String micrCode = rs.getString("micrCode");
 			final String ifscCode = rs.getString("ifscCode");
 			final int presentationStatus = rs.getInt("presentationStatus");
 			final EnumOptionData presentationType = PaymentInventoryEnumerations.presentationTime(presentationStatus);
 			final boolean makePresentation = rs.getBoolean("makePresentation");
 
-			return PaymentInventoryPdcData.instance(id, pdcPeriod, date, amount, chequeDate, chequeNo, bankName,
-					ifscCode, presentationType, makePresentation);
+			return PaymentInventoryPdcData.instance(id, pdcPeriod, amount, chequeDate, chequeNo, bankName, branchName,
+					ifscCode, micrCode, presentationType, makePresentation);
 		}
 
 	}

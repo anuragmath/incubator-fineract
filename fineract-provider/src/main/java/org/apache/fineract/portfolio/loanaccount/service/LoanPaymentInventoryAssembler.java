@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.PaymentInventoryRepository;
+import org.apache.fineract.portfolio.loanaccount.exception.NumberOfChequesExceededLoanTermException;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
@@ -40,99 +41,112 @@ import com.google.gson.JsonObject;
 
 @Service
 public class LoanPaymentInventoryAssembler {
-	
-	private final FromJsonHelper fromJsonHelper;
-	private final PaymentInventoryRepository paymentInventoryRepository;
-	private final LoanRepository loanRepository;
-	
+
+    private final FromJsonHelper fromJsonHelper;
+    private final PaymentInventoryRepository paymentInventoryRepository;
+    private final LoanRepository loanRepository;
+    private Loan loan;
 
     @Autowired
     public LoanPaymentInventoryAssembler(final FromJsonHelper fromJsonHelper, final PaymentInventoryRepository paymentInventoryRepository,
-    		final LoanRepository loanRepository){
-    	this.fromJsonHelper = fromJsonHelper;
-    	this.paymentInventoryRepository = paymentInventoryRepository;
-    	this.loanRepository = loanRepository;
+            final LoanRepository loanRepository, final Loan loan) {
+        this.fromJsonHelper = fromJsonHelper;
+        this.paymentInventoryRepository = paymentInventoryRepository;
+        this.loanRepository = loanRepository;
+        this.loan = loan;
     }
-    
-    
-    public List<PaymentInventoryPdc> fromParsedJson(final JsonElement element, final Long paymentId, final Long loanId){
-    	
-    	final List<PaymentInventoryPdc> paymentInventory = new ArrayList<>();
- 
-    	if(element.isJsonObject()){
-    		final JsonObject topLevelJsonElement = element.getAsJsonObject();
-    		final String dateFormat = this.fromJsonHelper.extractDateFormatParameter(topLevelJsonElement);
+
+    public List<PaymentInventoryPdc> fromParsedJson(final JsonElement element, final Long paymentId, final Long loanId) {
+
+        final List<PaymentInventoryPdc> paymentInventory = new ArrayList<>();
+        LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment;
+        
+
+        if (element.isJsonObject()) {
+            final JsonObject topLevelJsonElement = element.getAsJsonObject();
+            final String dateFormat = this.fromJsonHelper.extractDateFormatParameter(topLevelJsonElement);
             final Locale locale = this.fromJsonHelper.extractLocaleParameter(topLevelJsonElement);
-            
-            final boolean isSeriesCheques = this.fromJsonHelper.extractBooleanNamed("isSeriesCheques", topLevelJsonElement);
+
+            final boolean isSeriesCheques;
+            if(topLevelJsonElement.has("isSeriesCheques"))
+                isSeriesCheques = this.fromJsonHelper.extractBooleanNamed("isSeriesCheques", topLevelJsonElement);
+            else
+                isSeriesCheques = false;
             
             if (topLevelJsonElement.has("pdcData") && topLevelJsonElement.get("pdcData").isJsonArray()) {
-            		
-            	final JsonArray array = topLevelJsonElement.get("pdcData").getAsJsonArray();
-            	if(isSeriesCheques){
-            		Long startChequeno = this.fromJsonHelper.extractLongNamed("chequeNo", array.get(0).getAsJsonObject());
-            		final Long endChequeno = this.fromJsonHelper.extractLongNamed("chequeNo", array.get(1).getAsJsonObject());
-            		final PaymentInventory paymentInventoryId = this.paymentInventoryRepository.findOne(paymentId);
-            		final Long NumberOfCheques = endChequeno-startChequeno;
-            		final BigDecimal amount = this.fromJsonHelper.extractBigDecimalNamed("amount", array.get(0).getAsJsonObject(), locale);
-            		final String nameOfBank = this.fromJsonHelper.extractStringNamed("nameOfBank",  array.get(0).getAsJsonObject());
-            		final String ifscCode = this.fromJsonHelper.extractStringNamed("ifscCode", array.get(0).getAsJsonObject());
-            		final Integer presentationStatus = this.fromJsonHelper.extractIntegerNamed("presentationStatus", array.get(0).getAsJsonObject(), locale);
-            		final boolean makePresentation = this.fromJsonHelper.extractBooleanNamed("makePresentation", array.get(0).getAsJsonObject());
-            		final Loan loan = this.loanRepository.findOne(loanId);
-            		
-            		for(int i = 0; i< NumberOfCheques+1; i++){
-            			final Integer period = i+1;
-            			final Long chequeno = startChequeno;
-            			startChequeno = startChequeno+1;
 
-                		final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loan.getLoanRepaymentScheduleInstallmet().get(i);
-            			final LocalDate chequeDate = loanRepaymentScheduleInstallment.getDueDate();
-            			final LocalDate date = loanRepaymentScheduleInstallment.getDueDate();
-            			final PaymentInventoryPdc paymentInv = PaymentInventoryPdc.createNew(paymentInventoryId,period, date, amount,
-                                chequeDate, chequeno, nameOfBank, ifscCode, presentationStatus,makePresentation);
+                final JsonArray array = topLevelJsonElement.get("pdcData").getAsJsonArray();
+                if (isSeriesCheques) {
+                    Long startChequeno = this.fromJsonHelper.extractLongNamed("chequeNo", array.get(0).getAsJsonObject());
+                    final Long endChequeno = this.fromJsonHelper.extractLongNamed("chequeNo", array.get(1).getAsJsonObject());
+                    final Long NumberOfCheques = endChequeno - startChequeno+1;
+                    loan = this.loanRepository.findOne(loanId);
+                    final Integer loanTerm = loan.getLoanRepaymentScheduleDetail().getNumberOfRepayments();
+                    if(loanTerm >= NumberOfCheques ) {
+                        final PaymentInventory paymentInventoryId = this.paymentInventoryRepository.findOne(paymentId);
                         
-                        paymentInventory.add(paymentInv);
-            		}
-                	
-            	}
-            	else{
-            	for (int i = 0; i < array.size(); i++) {
-            		final JsonObject paymentInventorys = array.get(i).getAsJsonObject();
-            		this.fromJsonHelper.extractLongNamed("id", paymentInventorys);
+                        final BigDecimal amount = this.fromJsonHelper.extractBigDecimalNamed("amount", array.get(0).getAsJsonObject(), locale);
+                        final String nameOfBank = this.fromJsonHelper.extractStringNamed("nameOfBank", array.get(0).getAsJsonObject());
+                        final String branchName = this.fromJsonHelper.extractStringNamed("branchName", array.get(0).getAsJsonObject());
+                        final String ifscCode = this.fromJsonHelper.extractStringNamed("ifscCode", array.get(0).getAsJsonObject());
+                        final String micrCode = this.fromJsonHelper.extractStringNamed("micrCode", array.get(0).getAsJsonObject());
+                        final Integer presentationStatus = this.fromJsonHelper.extractIntegerNamed("presentationStatus",
+                                array.get(0).getAsJsonObject(), locale);
+                        final boolean makePresentation = this.fromJsonHelper.extractBooleanNamed("makePresentation",
+                                array.get(0).getAsJsonObject());
 
-            		final Integer period = this.fromJsonHelper.extractIntegerNamed("period", paymentInventorys, locale);
-            		
-            		final LocalDate date = this.fromJsonHelper.extractLocalDateNamed("date", paymentInventorys, dateFormat, locale);
-            		
-            		final BigDecimal amount = this.fromJsonHelper.extractBigDecimalNamed("amount", paymentInventorys, locale);
-            		
-            		final LocalDate chequeDate = this.fromJsonHelper.extractLocalDateNamed("chequeDate", paymentInventorys, dateFormat, locale);
-            		
-            		final Long chequeno = this.fromJsonHelper.extractLongNamed("chequeNo", paymentInventorys);
-            		
-            		final String nameOfBank = this.fromJsonHelper.extractStringNamed("nameOfBank", paymentInventorys);
-            		
-            		final PaymentInventory paymentInventoryId = this.paymentInventoryRepository.findOne(paymentId);
-            		
-            		final String ifscCode = this.fromJsonHelper.extractStringNamed("ifscCode", paymentInventorys);
-            		
-            		final Integer presentationStatus = this.fromJsonHelper.extractIntegerNamed("presentationStatus", paymentInventorys, locale);
-            		
-            		final boolean makePresentation = this.fromJsonHelper.extractBooleanNamed("makePresentation", paymentInventorys);
-            				
-            		/*PdcPresentationStatus options = null;
-                    if (options != null) {
-                       options = PdcPresentationStatus.fromInt(presentationStatus);
-                    }*/
-        
-                    final PaymentInventoryPdc paymentInv = PaymentInventoryPdc.createNew(paymentInventoryId,period, date, amount,
-                            chequeDate, chequeno, nameOfBank, ifscCode, presentationStatus,makePresentation);
-                    paymentInventory.add(paymentInv);
-            	}
-            	}
-            }              
-    	}
-		return paymentInventory;
+                        for (int i = 0; i < NumberOfCheques; i++) {
+                            final Integer period = i + 1;
+                            final Long chequeno = startChequeno;
+                            startChequeno = startChequeno + 1;
+
+                            loanRepaymentScheduleInstallment = loan.getLoanRepaymentScheduleInstallmet().get(i);
+                            final LocalDate chequeDate = loanRepaymentScheduleInstallment.getDueDate();
+                            final PaymentInventoryPdc paymentInv = PaymentInventoryPdc.createNew(paymentInventoryId, period, amount,
+                                    chequeDate, chequeno, nameOfBank, branchName, ifscCode, micrCode, presentationStatus, makePresentation);
+
+                            paymentInventory.add(paymentInv);
+                        }
+                    } else
+                        throw new NumberOfChequesExceededLoanTermException(NumberOfCheques);
+                        
+                    
+                } else {
+                    for (int i = 0; i < array.size(); i++) {
+                        final JsonObject paymentInventorys = array.get(i).getAsJsonObject();
+                        this.fromJsonHelper.extractLongNamed("id", paymentInventorys);
+
+                        final Integer period = this.fromJsonHelper.extractIntegerNamed("period", paymentInventorys, locale);
+
+                        final BigDecimal amount = this.fromJsonHelper.extractBigDecimalNamed("amount", paymentInventorys, locale);
+
+                        final LocalDate chequeDate = this.fromJsonHelper.extractLocalDateNamed("chequeDate", paymentInventorys, dateFormat,
+                                locale);
+
+                        final Long chequeno = this.fromJsonHelper.extractLongNamed("chequeNo", paymentInventorys);
+
+                        final String nameOfBank = this.fromJsonHelper.extractStringNamed("nameOfBank", paymentInventorys);
+
+                        final String branchName = this.fromJsonHelper.extractStringNamed("branchName", paymentInventorys);
+
+                        final PaymentInventory paymentInventoryId = this.paymentInventoryRepository.findOne(paymentId);
+
+                        final String ifscCode = this.fromJsonHelper.extractStringNamed("ifscCode", paymentInventorys);
+
+                        final String micrCode = this.fromJsonHelper.extractStringNamed("micrCode", paymentInventorys);
+
+                        final Integer presentationStatus = this.fromJsonHelper.extractIntegerNamed("presentationStatus", paymentInventorys,
+                                locale);
+
+                        final boolean makePresentation = this.fromJsonHelper.extractBooleanNamed("makePresentation", paymentInventorys);
+
+                        final PaymentInventoryPdc paymentInv = PaymentInventoryPdc.createNew(paymentInventoryId, period, amount,
+                                chequeDate, chequeno, nameOfBank, branchName, ifscCode, micrCode, presentationStatus, makePresentation);
+                        paymentInventory.add(paymentInv);
+                    }
+                }
+            }
+        }
+        return paymentInventory;
     }
 }
