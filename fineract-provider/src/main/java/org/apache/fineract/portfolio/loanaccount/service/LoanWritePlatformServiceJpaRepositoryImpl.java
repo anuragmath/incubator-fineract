@@ -169,6 +169,7 @@ import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementData
 import org.apache.fineract.portfolio.loanaccount.exception.PaymentInventoryNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.exception.PaymentInventoryPdcNotFound;
 import org.apache.fineract.portfolio.loanaccount.exception.PdcChequeAlreadyPresentedAndDeclined;
+import org.apache.fineract.portfolio.loanaccount.exception.PdcChequeNotVerifiedForBanking;
 import org.apache.fineract.portfolio.loanaccount.guarantor.service.GuarantorDomainService;
 import org.apache.fineract.portfolio.loanaccount.handler.UpdateTransactionStatusCommandHandler;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
@@ -849,11 +850,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
         final PaymentTypeData paymentType = this.paymentType.retrieveOne(paymentTypeId.longValue());
         final String paymentName = paymentType.getName();
+        
+        final PaymentInventoryData inventoryId = this.paymentInventoryService.retrieveBasedOnLoanId(loanId);
+        final PaymentInventoryPdcData payment;
+        final PaymentInventoryPdc paymentInventoryPdc;
 
         if (paymentName.equals("PDC")) {
 
-            final PaymentInventoryData inventoryId = this.paymentInventoryService.retrieveBasedOnLoanId(loanId);
-            final PaymentInventoryPdcData payment;
+            
             if (inventoryId.getPdcType().getId() == 2) {
                 payment = this.paymentInventoryService.retrieveByCheque(paymentDetail.getChequeNo(), inventoryId.getId());
             } else {
@@ -863,15 +867,27 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                         .retrieveByInstallment(loanRepaymentScheduleInstallment.getInstallmentNumber().intValue(), inventoryId.getId());
             }
 
-            final PaymentInventoryPdc paymentInventoryPdc = this.paymentInventoryPdc.findOne(payment.getId());
+            paymentInventoryPdc = this.paymentInventoryPdc.findOne(payment.getId());
 
             if (paymentInventoryPdc.getPresentationStatus().equals(5)) {
                 throw new PdcChequeAlreadyPresentedAndDeclined(paymentInventoryPdc.getChequeno());
-            } else {
+            } else if (paymentInventoryPdc.getPresentationStatus().equals(1))
+                throw new PdcChequeNotVerifiedForBanking(paymentInventoryPdc.getChequeno());
+            else {
                 paymentInventoryPdc.setPresentationStatus(3);
                 paymentInventoryPdc.setMakePresentation(true);
             }
+        }else{
+            final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loan.possibleNextRepaymentInstallment();
+            if(inventoryId.getPdcType().getId() == 1){
+            payment = this.paymentInventoryService
+                    .retrieveByInstallment(loanRepaymentScheduleInstallment.getInstallmentNumber().intValue(), inventoryId.getId());
+            paymentInventoryPdc = this.paymentInventoryPdc.findOne(payment.getId());
+            paymentInventoryPdc.setPresentationStatus(0);
+            }
         }
+            
+        
         final Boolean isHolidayValidationDone = false;
         final HolidayDetailDTO holidayDetailDto = null;
         boolean isAccountTransfer = false;
@@ -970,7 +986,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final PaymentInventoryPdc paymentInventoryPdc = this.paymentInventoryPdc.findOne(payment.getId());
 
             if (transactionStatusToUpdate.getTransactionStatus() == 2) {
-                paymentInventoryPdc.setPresentationStatus(3);
+                paymentInventoryPdc.setPresentationStatus(4);
             }
         }
 
@@ -1235,9 +1251,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 loanRepaymentScheduleInstallment = loan.possibleNextRepaymentInstallment();
             else
                 loanRepaymentScheduleInstallment = loan.fetchRepaymentScheduleInstallment(transactionDate);
-
+            
             final PaymentInventoryPdcData payment = this.paymentInventoryService
-                    .retrieveByInstallment(loanRepaymentScheduleInstallment.getInstallmentNumber().intValue(), inventoryId.getId());
+                    .retrieveByCheque(transactionToAdjust.getPaymentDetail().getChequeNo(), inventoryId.getId());
 
             final PaymentInventoryPdc paymentInventoryPdc = this.paymentInventoryPdc.findOne(payment.getId());
 

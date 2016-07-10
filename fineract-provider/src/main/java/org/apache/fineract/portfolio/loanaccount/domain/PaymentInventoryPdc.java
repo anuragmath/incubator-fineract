@@ -48,7 +48,7 @@ public class PaymentInventoryPdc extends AbstractPersistable<Long> {
     @Column(name = "period", nullable = true)
     private Integer period;
 
-    @Column(name = "amount", scale = 6, precision = 19, nullable = false)
+    @Column(name = "amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal amount;
 
     @Temporal(TemporalType.DATE)
@@ -162,7 +162,10 @@ public class PaymentInventoryPdc extends AbstractPersistable<Long> {
     }
 
     public String getChequeno() {
-        return chequeno.toString();
+        if(chequeno == null)
+            return null;
+        else
+            return chequeno.toString();
     }
 
     public void setChequeno(Long chequeno) {
