@@ -19,6 +19,9 @@ public class PdcTypeEnumerations {
 		case SECURITY_PDC: 
 			option = new EnumOptionData(PdcTypeEnumOption.SECURITY_PDC.getValue().longValue(), PdcTypeEnumOption.SECURITY_PDC.getCode(), "SecurityPdc");
 			break;
+		case PARTIAL_PDC: 
+		        option = new EnumOptionData(PdcTypeEnumOption.PARTIAL_PDC.getValue().longValue(), PdcTypeEnumOption.PARTIAL_PDC.getCode(), "PartialPdc");
+		        break;
 		default:
 			option = new EnumOptionData(PdcTypeEnumOption.INVALID.getValue().longValue(), PdcTypeEnumOption.INVALID.getCode() , "Invalid");
 			break;

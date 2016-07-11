@@ -428,7 +428,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         } else {
 
             try {
-                if(paymentInventory.getPdcType().getId() == 1)
+                if(paymentInventory.getPdcType().getId() != 2)
                     paymentInventoryPdcData = this.paymentInventoryService.retrieveByInstallment(
                             loanRepaymentScheduleInstallment.getInstallmentNumber().intValue(), paymentInventory.getId());
                 else
