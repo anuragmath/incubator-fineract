@@ -497,12 +497,21 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
      * @return void
      **/
     public CommandProcessingResult addPaymentInventory(final Long loanId, final JsonCommand command) {
-
+        
+        int numberOfPdc = 0;
         try {
             final Loan loan = this.loanAssembler.assembleFrom(loanId);
             final JsonElement element = command.parsedJson();
-
-            final PaymentInventory paymentInventory = PaymentInventory.createNewFromJson(loan, command);
+            if(element.isJsonObject()){
+                final JsonObject topLevelJsonElement = element.getAsJsonObject();
+                if (topLevelJsonElement.has("pdcData") && topLevelJsonElement.get("pdcData").isJsonArray()) {
+                    final JsonArray array = topLevelJsonElement.get("pdcData").getAsJsonArray();
+                    numberOfPdc = array.size();
+                }
+            }
+                
+            
+            final PaymentInventory paymentInventory = PaymentInventory.createNewFromJson(loan, numberOfPdc, command);
 
             this.paymentInventoryRepository.save(paymentInventory);
 
@@ -869,9 +878,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
             paymentInventoryPdc = this.paymentInventoryPdc.findOne(payment.getId());
 
-            if (paymentInventoryPdc.getPresentationStatus().equals(5)) {
+            /*if (paymentInventoryPdc.getPresentationStatus().equals(5)) {
                 throw new PdcChequeAlreadyPresentedAndDeclined(paymentInventoryPdc.getChequeno());
-            } else if (paymentInventoryPdc.getPresentationStatus().equals(1))
+            } else*/ if (paymentInventoryPdc.getPresentationStatus().equals(1))
                 throw new PdcChequeNotVerifiedForBanking(paymentInventoryPdc.getChequeno());
             else {
                 paymentInventoryPdc.setPresentationStatus(3);
@@ -879,11 +888,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             }
         }else{
             final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loan.possibleNextRepaymentInstallment();
-            if(inventoryId.getPdcType().getId() == 1){
+            if(inventoryId.getPdcType().getId() == 1 || inventoryId.getPdcType().getId() == 3 && 
+                    loanRepaymentScheduleInstallment.getInstallmentNumber().intValue() <= inventoryId.getPeriods()){
             payment = this.paymentInventoryService
                     .retrieveByInstallment(loanRepaymentScheduleInstallment.getInstallmentNumber().intValue(), inventoryId.getId());
+      
             paymentInventoryPdc = this.paymentInventoryPdc.findOne(payment.getId());
             paymentInventoryPdc.setPresentationStatus(0);
+            
             }
         }
             

@@ -105,6 +105,10 @@ public class PaymentInventoryData {
         return this.pdcType;
     }
 
+    public Integer getPeriods(){
+        return this.periods;
+    }
+    
     public Collection<PaymentInventoryPdcData> getPaymentInventoryPdcData() {
         return this.paymentInventoryPdc;
     }
