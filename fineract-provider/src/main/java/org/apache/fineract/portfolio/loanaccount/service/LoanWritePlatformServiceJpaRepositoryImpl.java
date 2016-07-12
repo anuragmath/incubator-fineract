@@ -1026,7 +1026,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             if(changeInValue.differenceExists(chequeNo, pdcData.getChequeno())){
                 final String newValue = chequeNo;
                 changes.put("chequeNo", newValue);
-                pdcToUpdate.setChequeno(Long.valueOf(chequeNo).longValue());
+                pdcToUpdate.setChequeno(chequeNo);
             }
             
             final String bankName = this.fromApiJsonHelper.extractStringNamed("nameOfBank", paymentInventorys);
