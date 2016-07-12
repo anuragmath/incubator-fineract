@@ -103,7 +103,7 @@ public class LoanPaymentInventoryAssembler {
                             loanRepaymentScheduleInstallment = loan.getLoanRepaymentScheduleInstallmet().get(i);
                             final LocalDate chequeDate = loanRepaymentScheduleInstallment.getDueDate();
                             final PaymentInventoryPdc paymentInv = PaymentInventoryPdc.createNew(paymentInventoryId, period, amount,
-                                    chequeDate, chequeno, nameOfBank, branchName, ifscCode, micrCode, presentationStatus, makePresentation);
+                                    chequeDate, chequeno.toString(), nameOfBank, branchName, ifscCode, micrCode, presentationStatus, makePresentation);
 
                             paymentInventory.add(paymentInv);
                         }
@@ -123,7 +123,7 @@ public class LoanPaymentInventoryAssembler {
                         final LocalDate chequeDate = this.fromJsonHelper.extractLocalDateNamed("chequeDate", paymentInventorys, dateFormat,
                                 locale);
 
-                        final Long chequeno = this.fromJsonHelper.extractLongNamed("chequeNo", paymentInventorys);
+                        final String chequeno = this.fromJsonHelper.extractStringNamed("chequeNo", paymentInventorys);
 
                         final String nameOfBank = this.fromJsonHelper.extractStringNamed("nameOfBank", paymentInventorys);
 

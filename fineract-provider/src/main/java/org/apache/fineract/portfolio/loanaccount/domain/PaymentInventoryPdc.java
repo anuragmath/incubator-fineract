@@ -56,7 +56,7 @@ public class PaymentInventoryPdc extends AbstractPersistable<Long> {
     private Date chequeDate;
 
     @Column(name = "cheque_no", nullable = false)
-    private Long chequeno;
+    private String chequeno;
 
     @Column(name = "name_of_bank", nullable = false)
     private String nameOfBank;
@@ -91,7 +91,7 @@ public class PaymentInventoryPdc extends AbstractPersistable<Long> {
     }
 
     public PaymentInventoryPdc(final Integer period, final BigDecimal amount, final LocalDate chequeDate,
-            final Long chequeno, final String nameOfBank, final String branchName, final String ifscCode, final String micrCode,
+            final String chequeno, final String nameOfBank, final String branchName, final String ifscCode, final String micrCode,
             final PdcPresentationEnumOption status, final boolean makePresentation) {
         this.period = period;
         this.amount = amount;
@@ -110,7 +110,7 @@ public class PaymentInventoryPdc extends AbstractPersistable<Long> {
     }
 
     public PaymentInventoryPdc(final PaymentInventory payment, final Integer period, final BigDecimal amount,
-            final LocalDate chequeDate, final Long chequeno, final String nameOfBank, final String branchName, final String ifscCode,
+            final LocalDate chequeDate, final String chequeno, final String nameOfBank, final String branchName, final String ifscCode,
             final String micrCode, final PdcPresentationEnumOption status, final boolean makePresentation) {
         this.paymentInventory = payment;
         this.period = period;
@@ -129,7 +129,7 @@ public class PaymentInventoryPdc extends AbstractPersistable<Long> {
     }
 
     public static PaymentInventoryPdc createNew(final PaymentInventory payment, final Integer period,
-            final BigDecimal amount, final LocalDate chequeDate, final Long chequeno, final String nameOfBank, final String branchName,
+            final BigDecimal amount, final LocalDate chequeDate, final String chequeno, final String nameOfBank, final String branchName,
             final String ifscCode, final String micrCode, final Integer presentationStatus, final boolean makePresentation) {
 
         final PdcPresentationEnumOption status = PdcPresentationEnumOption.fromInt(presentationStatus);
@@ -165,10 +165,10 @@ public class PaymentInventoryPdc extends AbstractPersistable<Long> {
         if(chequeno == null)
             return null;
         else
-            return chequeno.toString();
+            return chequeno;
     }
 
-    public void setChequeno(Long chequeno) {
+    public void setChequeno(String chequeno) {
         this.chequeno = chequeno;
     }
 

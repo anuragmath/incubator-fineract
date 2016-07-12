@@ -159,7 +159,7 @@ public class PaymentInventoryReadPlatformServiceImpl implements PaymentInventory
 			final int pdcPeriod = rs.getInt("pdcPeriod");
 			final BigDecimal amount = rs.getBigDecimal("Amount");
 			LocalDate chequeDate = JdbcSupport.getLocalDate(rs, "chequeDate");
-			final Long chequeNo = rs.getLong("chequeNo");
+			final String chequeNo = rs.getString("chequeNo");
 			final String bankName = rs.getString("bankName");
 			final String branchName = rs.getString("branchName");
 			final String micrCode = rs.getString("micrCode");

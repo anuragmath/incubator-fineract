@@ -38,7 +38,7 @@ public class PaymentInventoryPdcData {
 
     private final LocalDate chequeDate;
 
-    private final Long chequeno;
+    private final String chequeno;
 
     private final String nameOfBank;
 
@@ -61,7 +61,7 @@ public class PaymentInventoryPdcData {
     }
 
     public static PaymentInventoryPdcData instance(final Long id, final Integer period, final BigDecimal amount,
-            final LocalDate chequeDate, final Long chequeno, final String nameOfBank, final String branchName, final String ifscCode,
+            final LocalDate chequeDate, final String chequeno, final String nameOfBank, final String branchName, final String ifscCode,
             final String micrCode, final EnumOptionData presentationStatus, final boolean makePresentation) {
 
         final List<EnumOptionData> presentationType = null;
@@ -72,7 +72,7 @@ public class PaymentInventoryPdcData {
     }
 
     private PaymentInventoryPdcData(final Long id, final Integer period, final BigDecimal amount,
-            final LocalDate chequeDate, final Long chequeno, final String nameOfBank, final String branchName, final String ifscCode,
+            final LocalDate chequeDate, final String chequeno, final String nameOfBank, final String branchName, final String ifscCode,
             final String micrCode, final EnumOptionData presentationStatus, final boolean makePresentation, final List<EnumOptionData> presentationType) {
         this.period = period;
         this.id = id;
@@ -127,7 +127,7 @@ public class PaymentInventoryPdcData {
         return amount;
     }
 
-    public Long getChequeno() {
+    public String getChequeno() {
         return chequeno;
     }
 
