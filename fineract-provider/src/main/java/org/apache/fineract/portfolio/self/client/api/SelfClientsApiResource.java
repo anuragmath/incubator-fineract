@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.self.client.api;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -73,6 +74,14 @@ public class SelfClientsApiResource {
 		this.clientTransactionsApiResource = clientTransactionsApiResource;
 		this.appUserClientMapperReadService = appUserClientMapperReadService;
 		this.dataValidator = dataValidator;
+	}
+	
+	@POST
+	@Consumes({ MediaType.APPLICATION_JSON})
+	@Produces({ MediaType.APPLICATION_JSON})
+	public String createSelfServiceClient(final String apiRequestBodyAsJson) {
+	    
+	    return this.clientApiResource.create(apiRequestBodyAsJson);
 	}
 
 	@GET

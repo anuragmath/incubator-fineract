@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.collectionsheet.data;
 import java.math.BigDecimal;
 
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.portfolio.loanaccount.data.PaymentInventoryPdcData;
 
 /**
  * Immutable data object for extracting flat data for joint liability group's
@@ -42,11 +43,16 @@ public class IndividualCollectionSheetLoanFlatData {
     private BigDecimal interestDue = BigDecimal.ZERO;
     private BigDecimal interestPaid = BigDecimal.ZERO;
     private BigDecimal chargesDue = BigDecimal.ZERO;
+    private Long chequeNumber;
+    private String micrCode;
+    private String nameOfbank;
+    private String chequeData;
 
     public IndividualCollectionSheetLoanFlatData(final String clientName, final Long clientId, final Long loanId, final String accountId,
             final Integer accountStatusId, final String productShortName, final Long productId, final CurrencyData currency,
             final BigDecimal disbursementAmount, final BigDecimal principalDue, final BigDecimal principalPaid,
-            final BigDecimal interestDue, final BigDecimal interestPaid, final BigDecimal chargesDue) {
+            final BigDecimal interestDue, final BigDecimal interestPaid, final BigDecimal chargesDue, final Long chequeNumber,
+            final String micrCode, final String nameOfBank, final String chequeData) {
         this.clientName = clientName;
         this.clientId = clientId;
         this.loanId = loanId;
@@ -61,6 +67,10 @@ public class IndividualCollectionSheetLoanFlatData {
         this.interestDue = interestDue;
         this.interestPaid = interestPaid;
         this.chargesDue = chargesDue;
+        this.chequeNumber = chequeNumber;
+        this.micrCode = micrCode;
+        this.nameOfbank = nameOfBank;
+        this.chequeData = chequeData;
     }
 
     public String getClientName() {
@@ -121,11 +131,43 @@ public class IndividualCollectionSheetLoanFlatData {
 
     public LoanDueData getLoanDueData() {
         return new LoanDueData(this.loanId, this.accountId, this.accountStatusId, this.productShortName, this.productId, this.currency,
-                this.disbursementAmount, this.principalDue, this.principalPaid, this.interestDue, this.interestPaid, this.chargesDue);
+                this.disbursementAmount, this.principalDue, this.principalPaid, this.interestDue, this.interestPaid, this.chargesDue,
+                this.chequeNumber, this.micrCode, this.nameOfbank, this.chequeData);
     }
 
     public IndividualClientData getClientData() {
         return IndividualClientData.instance(this.clientId, this.clientName);
     }
 
+    public Long getChequeNumber() {
+        return chequeNumber;
+    }
+
+    public void setChequeNumber(Long chequeNumber) {
+        this.chequeNumber = chequeNumber;
+    }
+
+    public String getMicrCode() {
+        return micrCode;
+    }
+
+    public void setMicrCode(String micrCode) {
+        this.micrCode = micrCode;
+    }
+
+    public String getNameOfbank() {
+        return nameOfbank;
+    }
+
+    public void setNameOfbank(String nameOfbank) {
+        this.nameOfbank = nameOfbank;
+    }
+
+    public String getChequeData() {
+        return chequeData;
+    }
+
+    public void setChequeData(String chequeData) {
+        this.chequeData = chequeData;
+    }
 }

@@ -734,6 +734,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             sb.append("from (SELECT cl.display_name As clientName, ");
             sb.append("cl.id As clientId, ln.id As loanId, ln.account_no As accountId, ln.loan_status_id As accountStatusId,");
             sb.append(" pl.short_name As productShortName, ln.product_id As productId, ");
+            sb.append(" pdc.cheque_date as chequeDate, pdc.cheque_no as chequeNumber, pdc.micr_code as micrCode, pdc.name_of_bank as nameOfbank, ");
             sb.append("ln.currency_code as currencyCode, ln.currency_digits as currencyDigits, ln.currency_multiplesof as inMultiplesOf, ");
             sb.append("rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, ");
             sb.append("if(ln.loan_status_id = 200 , ln.principal_amount , null) As disbursementAmount, ");
@@ -744,20 +745,11 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             sb.append("FROM m_loan ln ");
             sb.append("JOIN m_client cl ON cl.id = ln.client_id  ");
             sb.append("LEFT JOIN m_office of ON of.id = cl.office_id  AND of.hierarchy like :officeHierarchy ");
+            sb.append("LEFT JOIN m_payment_inventory pi ON pi.loan_id = ln.id ");
+            sb.append("LEFT JOIN m_payment_inventory_pdc pdc ON pdc.payment_id = pi.id AND pdc.cheque_date = :dueDate AND pdc.present_type_of = 2 ");
             sb.append("LEFT JOIN m_product_loan pl ON pl.id = ln.product_id ");
             sb.append("LEFT JOIN m_currency rc on rc.`code` = ln.currency_code ");
-            sb.append("JOIN m_loan_repayment_schedule ls ON ls.loan_id = ln.id AND ls.completed_derived = 0 AND ls.duedate <= :dueDate ");
-            sb.append("where ");
-            if (checkForOfficeId) {
-                sb.append("of.id = :officeId and ");
-            }
-            if (checkforStaffId) {
-                sb.append("ln.loan_officer_id = :staffId and ");
-            }
-            sb.append("(ln.loan_status_id = 300) ");
-            sb.append("and ln.group_id is null GROUP BY cl.id , ln.id ORDER BY cl.id , ln.id ) loandata ");
-            sb.append("LEFT JOIN m_loan_charge lc ON lc.loan_id = loandata.loanId AND lc.is_paid_derived = 0 AND lc.is_active = 1 AND ( lc.due_for_collection_as_of_date  <= :dueDate OR lc.charge_time_enum = 1) ");
-            sb.append("GROUP BY loandata.clientId, loandata.loanId ORDER BY loandata.clientId, loandata.loanId ");
+            sb.append("JOIN m_loan_repayment_schedule ls ON ls.loan_id = ln.id AND ls.completed_derived = 0 AND ls.duedate <= :dueDate )");
 
             sql = sb.toString();
         }
@@ -775,7 +767,12 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             final Integer accountStatusId = JdbcSupport.getInteger(rs, "accountStatusId");
             final String productShortName = rs.getString("productShortName");
             final Long productId = JdbcSupport.getLong(rs, "productId");
-
+            final String chequeData = rs.getString("chequeDate");
+            final Long chequeNumber = JdbcSupport.getLong(rs, "chequeNumber");
+            final String micrCode = rs.getString("micrCode");
+           
+            final String nameOfBank = rs.getString("nameOfBank");
+           
             final String currencyCode = rs.getString("currencyCode");
             final String currencyName = rs.getString("currencyName");
             final String currencyNameCode = rs.getString("currencyNameCode");
@@ -787,16 +784,17 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                 currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol,
                         currencyNameCode);
             }
-
+ 
             final BigDecimal disbursementAmount = rs.getBigDecimal("disbursementAmount");
             final BigDecimal principalDue = rs.getBigDecimal("principalDue");
             final BigDecimal principalPaid = rs.getBigDecimal("principalPaid");
             final BigDecimal interestDue = rs.getBigDecimal("interestDue");
             final BigDecimal interestPaid = rs.getBigDecimal("interestPaid");
             final BigDecimal chargesDue = rs.getBigDecimal("chargesDue");
-
+ 
             return new IndividualCollectionSheetLoanFlatData(clientName, clientId, loanId, accountId, accountStatusId, productShortName,
-                    productId, currencyData, disbursementAmount, principalDue, principalPaid, interestDue, interestPaid, chargesDue);
+                    productId, currencyData, disbursementAmount, principalDue, principalPaid, interestDue, interestPaid, chargesDue,chequeNumber,
+                    micrCode,nameOfBank,chequeData);
         }
 
     }

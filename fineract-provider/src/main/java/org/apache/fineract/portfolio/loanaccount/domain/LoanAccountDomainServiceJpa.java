@@ -153,7 +153,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
          * .validateRepaymentDateWithMeetingDate(transactionDate,
          * calendarInstance); }
          */
-        
+
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
 
@@ -164,17 +164,20 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             newRepaymentTransaction = LoanTransaction.recoveryRepayment(loan.getOffice(), repaymentAmount, paymentDetail, transactionDate,
                     txnExternalId, currentDateTime, currentUser);
         } else {
-        	
-        		Integer statusType = null;
-        		PaymentType paymentType = paymentDetail.getPaymentType();
-        		
-        		if(paymentType.getValue().equals("PDC")){
-        			statusType = LoanTransactionStatusType.INPROGRESS.getValue();
-        		} else
-        			statusType = LoanTransactionStatusType.CLEAR.getValue();
-           
-			newRepaymentTransaction = LoanTransaction.repayment(loan.getOffice(), repaymentAmount, paymentDetail, transactionDate,
-                    txnExternalId, currentDateTime, currentUser,statusType);
+
+            Integer statusType = null;
+            if (paymentDetail != null) {
+
+                PaymentType paymentType = paymentDetail.getPaymentType();
+
+                if (paymentType.getValue().equals("PDC"))
+                    statusType = LoanTransactionStatusType.INPROGRESS.getValue();
+                else
+                    statusType = LoanTransactionStatusType.CLEAR.getValue();
+            } else
+                statusType = LoanTransactionStatusType.CLEAR.getValue();
+            newRepaymentTransaction = LoanTransaction.repayment(loan.getOffice(), repaymentAmount, paymentDetail, transactionDate,
+                    txnExternalId, currentDateTime, currentUser, statusType);
         }
 
         LocalDate recalculateFrom = null;
@@ -381,8 +384,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final LoanTransaction newRefundTransaction = LoanTransaction.refund(loan.getOffice(), refundAmount, paymentDetail, transactionDate,
                 txnExternalId, DateUtils.getLocalDateTimeOfTenant(), currentUser);
         final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
-        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
-                transactionDate.toDate(), HolidayStatusType.ACTIVE.getValue());
+        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), transactionDate.toDate(),
+                HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
 
@@ -446,17 +449,18 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
      * 
      * @see
      * org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService
-     * #recalculateAccruals(org.apache.fineract.portfolio.loanaccount.domain.Loan)
+     * #recalculateAccruals(org.apache.fineract.portfolio.loanaccount.domain.
+     * Loan)
      */
     @Override
     public void recalculateAccruals(Loan loan) {
         LocalDate accruedTill = loan.getAccruedTill();
         boolean isOrganisationDateEnabled = this.configurationDomainService.isOrganisationstartDateEnabled();
         Date organisationStartDate = new Date();
-        if(isOrganisationDateEnabled){
-            organisationStartDate = this.configurationDomainService.retrieveOrganisationStartDate(); 
+        if (isOrganisationDateEnabled) {
+            organisationStartDate = this.configurationDomainService.retrieveOrganisationStartDate();
         }
-        
+
         if (!loan.isPeriodicAccrualAccountingEnabledOnLoanProduct() || !loan.repaymentScheduleDetail().isInterestRecalculationEnabled()
                 || accruedTill == null || loan.isNpa() || !loan.status().isActive()) { return; }
         Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas = new ArrayList<>();
@@ -477,9 +481,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             if (installment.getDueDate().isAfter(loan.getMaturityDate())) {
                 accruedTill = DateUtils.getLocalDateOfTenant();
             }
-            if(!isOrganisationDateEnabled || new LocalDate(organisationStartDate).isBefore(installment.getDueDate())){
-                generateLoanScheduleAccrualData(accruedTill, loanScheduleAccrualDatas, loanId, officeId, accrualStartDate, repaymentFrequency, 
-                        repayEvery, interestCalculatedFrom, loanProductId, currency, currencyData, loanCharges, installment);
+            if (!isOrganisationDateEnabled || new LocalDate(organisationStartDate).isBefore(installment.getDueDate())) {
+                generateLoanScheduleAccrualData(accruedTill, loanScheduleAccrualDatas, loanId, officeId, accrualStartDate,
+                        repaymentFrequency, repayEvery, interestCalculatedFrom, loanProductId, currency, currencyData, loanCharges,
+                        installment);
             }
         }
 
@@ -492,11 +497,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
     }
 
-    private void generateLoanScheduleAccrualData(final LocalDate accruedTill, final Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas, 
-            final Long loanId, Long officeId, final LocalDate accrualStartDate, final PeriodFrequencyType repaymentFrequency, final Integer repayEvery, 
-            final LocalDate interestCalculatedFrom, final Long loanProductId, final MonetaryCurrency currency, final CurrencyData currencyData, 
-            final Set<LoanCharge> loanCharges, final LoanRepaymentScheduleInstallment installment) {
-        
+    private void generateLoanScheduleAccrualData(final LocalDate accruedTill,
+            final Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas, final Long loanId, Long officeId,
+            final LocalDate accrualStartDate, final PeriodFrequencyType repaymentFrequency, final Integer repayEvery,
+            final LocalDate interestCalculatedFrom, final Long loanProductId, final MonetaryCurrency currency,
+            final CurrencyData currencyData, final Set<LoanCharge> loanCharges, final LoanRepaymentScheduleInstallment installment) {
+
         if (!accruedTill.isBefore(installment.getDueDate())
                 || (accruedTill.isAfter(installment.getFromDate()) && !accruedTill.isAfter(installment.getDueDate()))) {
             BigDecimal dueDateFeeIncome = BigDecimal.ZERO;
@@ -517,11 +523,11 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             }
             LoanScheduleAccrualData accrualData = new LoanScheduleAccrualData(loanId, officeId, installment.getInstallmentNumber(),
                     accrualStartDate, repaymentFrequency, repayEvery, installment.getDueDate(), installment.getFromDate(),
-                    installment.getId(), loanProductId, installment.getInterestCharged(currency).getAmount(), installment
-                            .getFeeChargesCharged(currency).getAmount(), installment.getPenaltyChargesCharged(currency).getAmount(),
-                    installment.getInterestAccrued(currency).getAmount(), installment.getFeeAccrued(currency).getAmount(), installment
-                            .getPenaltyAccrued(currency).getAmount(), currencyData, interestCalculatedFrom, installment
-                            .getInterestWaived(currency).getAmount());
+                    installment.getId(), loanProductId, installment.getInterestCharged(currency).getAmount(),
+                    installment.getFeeChargesCharged(currency).getAmount(), installment.getPenaltyChargesCharged(currency).getAmount(),
+                    installment.getInterestAccrued(currency).getAmount(), installment.getFeeAccrued(currency).getAmount(),
+                    installment.getPenaltyAccrued(currency).getAmount(), currencyData, interestCalculatedFrom,
+                    installment.getInterestWaived(currency).getAmount());
             loanScheduleAccrualDatas.add(accrualData);
 
         }
@@ -558,8 +564,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final LoanTransaction newRefundTransaction = LoanTransaction.refundForActiveLoan(loan.getOffice(), refundAmount, paymentDetail,
                 transactionDate, txnExternalId, DateUtils.getLocalDateTimeOfTenant(), currentUser);
         final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
-        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
-                transactionDate.toDate(), HolidayStatusType.ACTIVE.getValue());
+        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), transactionDate.toDate(),
+                HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
 
@@ -623,34 +629,31 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 loan.getLoanTransactions().add(accrualTransaction);
                 Set<LoanChargePaidBy> accrualCharges = accrualTransaction.getLoanChargesPaid();
                 for (LoanCharge loanCharge : loan.charges()) {
-                    if (loanCharge.isActive()
-                            && !loanCharge.isPaid()
-                            && (loanCharge.isDueForCollectionFromAndUpToAndIncluding(fromDate, foreClosureDate) || loanCharge
-                                    .isInstalmentFee())) {
-                        final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(accrualTransaction, loanCharge, loanCharge
-                                .getAmountOutstanding(currency).getAmount(), null);
+                    if (loanCharge.isActive() && !loanCharge.isPaid()
+                            && (loanCharge.isDueForCollectionFromAndUpToAndIncluding(fromDate, foreClosureDate)
+                                    || loanCharge.isInstalmentFee())) {
+                        final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(accrualTransaction, loanCharge,
+                                loanCharge.getAmountOutstanding(currency).getAmount(), null);
                         accrualCharges.add(loanChargePaidBy);
                     }
                 }
             }
         }
-        
 
         Money interestPayable = foreCloseDetail.getInterestCharged(currency);
         Money feePayable = foreCloseDetail.getFeeChargesCharged(currency);
         Money penaltyPayable = foreCloseDetail.getPenaltyChargesCharged(currency);
-        Money payPrincipal = foreCloseDetail.getPrincipal(currency);        
+        Money payPrincipal = foreCloseDetail.getPrincipal(currency);
         loan.updateInstallmentsPostDate(foreClosureDate);
 
         LoanTransaction payment = null;
-        
-         
+
         if (payPrincipal.plus(interestPayable).plus(feePayable).plus(penaltyPayable).isGreaterThanZero()) {
             final PaymentDetail paymentDetail = null;
-            String externalId = null;            
+            String externalId = null;
             final LocalDateTime currentDateTime = DateUtils.getLocalDateTimeOfTenant();
             payment = LoanTransaction.repayment(loan.getOffice(), payPrincipal.plus(interestPayable).plus(feePayable).plus(penaltyPayable),
-                    paymentDetail, foreClosureDate, externalId, currentDateTime, appUser,null);
+                    paymentDetail, foreClosureDate, externalId, currentDateTime, appUser, null);
             createdDate = createdDate.plusSeconds(1);
             payment.updateCreatedDate(createdDate.toDate());
             payment.updateLoan(loan);
@@ -675,7 +678,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
         changes.put("transactions", transactionIds);
         changes.put("eventAmount", payPrincipal.getAmount().negate());
-        
+
         if (changedTransactionDetail != null) {
             for (Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
                 saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
@@ -684,7 +687,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
             }
         }
-        
+
         saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
